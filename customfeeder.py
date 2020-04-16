@@ -5,15 +5,31 @@ import webbrowser
 from configparser import ConfigParser
 
 cp = ConfigParser()
-cp.read('settings.config')
-my_url = cp.get('custom-feeder-config', 'my_url')
-html_content = cp.get('custom-feeder-config', 'html_content')
-number_of_news = cp.get('custom-feeder-config', 'number_of_news')
+cp.read(r'C:\Users\Piter\Documents\Python\news_feeder\settings.config')
 
-feeds = feedparser.parse(my_url)
+urls = []
 latest_feeds = []
+i = 1
 
-for news_number in range(0,int(number_of_news)):
+
+for x in cp.sections():
+    print(i, cp.get(x, 'my_url'))
+    urls.append(
+        {
+            "id": i,
+            "url": cp.get(x, 'my_url'),
+            'html_content': cp.get(x, 'html_content'),
+            'number_of_news': cp.get(x, 'number_of_news')
+        }
+    )
+    i += 1
+
+my_url = input('Choose URL ID: ')
+
+feeds = feedparser.parse(urls[int(my_url)-1]['url'])
+
+
+for news_number in range(0,int(urls[int(my_url)-1]['number_of_news'])):
 
     latest_feeds.append(
         {
@@ -34,9 +50,9 @@ while True:
 
     chosen_readmore = requests.get(latest_feeds[int(readmore)-1]['Link'])
     soup = BeautifulSoup(chosen_readmore.content, 'html.parser')
-    classfind = soup.select(html_content)
+    classfind = soup.select(urls[int(my_url)-1]['html_content'])
 
-    with open(r'news.html', 'w+') as news_file:
+    with open(r'news.html', 'w+', encoding='utf-8') as news_file:
         news_file.write(str(classfind))
     news_file.close()
 
